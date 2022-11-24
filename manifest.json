@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-habit-helpers",
+	"name": "Habit Helpers",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Tools to keep your habits on track!",
+	"author": "jrddp",
+	"authorUrl": "https://github.com/jrddp",
+	"isDesktopOnly": false
+}
