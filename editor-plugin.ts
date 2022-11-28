@@ -76,7 +76,8 @@ class HabitPreviewPlugin implements PluginValue {
       });
     }
 
-    return Decoration.set(widgets, true);
+    const decorations = Decoration.set(widgets, true);
+    return decorations;
   }
 }
 
