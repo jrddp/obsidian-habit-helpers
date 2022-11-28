@@ -8,13 +8,14 @@ import {
 	PluginSettingTab,
 	Setting
 } from 'obsidian';
-import { getLastDateCompleted } from 'vault-inspector';
+import { getLastDateCompleted, getTimeBetween } from 'vault-inspector';
 import { habitPreviewPlugin } from "./editor-plugin";
 
 // Remember to rename these classes and interfaces!
 
-// todo this is a temporary constant
+// todo these are temporary constants. They should be imported from settings or, ideally, imported from the daily notes/periodic notes plugin settings
 const DAILY_NOTES_FOLDER = "100 General/Note of the Days"
+const DATE_FORMAT = "YYYY-MM-DD"
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -44,7 +45,7 @@ export default class MyPlugin extends Plugin {
 			callback: () => {
 				new LastDoneModal(this.app, (result) => {
 					const date = getLastDateCompleted(this.app, DAILY_NOTES_FOLDER, result);
-					date.then(result => new Notice(result))
+					date.then(result => new Notice(getTimeBetween(DATE_FORMAT, result, "2022-11-28")))
 					.catch(result => new Notice("An error occurred: " + result))
 				}).open();
 			}

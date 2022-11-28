@@ -1,4 +1,6 @@
+import moment from "moment";
 import { App, TFile } from "obsidian";
+import { format } from "path";
 
 const HABIT_COMPLETE_REGEX_PREFIX = "\\[x\\]\\s";
 
@@ -25,5 +27,11 @@ export async function getLastDateCompleted(app: App, notes_folder: string, habit
     }
   }
 
-  return "never"
+  return "never";
+}
+
+export function getTimeBetween(date_format: string, date_old_str: string, date_new_str: string) {
+  const date_old = moment(date_old_str, date_format);
+  const date_new = moment(date_new_str, date_format);
+  return date_old.from(date_new);
 }
