@@ -10,7 +10,12 @@ import {
   ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
+import { escapeRegExp } from "./util";
 import { LastDoneWidget } from "./widgets";
+
+// todo make this an editable setting
+const INLINE_PREFIX = "!h"
+const PREFIX_REGEX = new RegExp("^" + escapeRegExp(INLINE_PREFIX) + "\\s+\\S", "m")
 
 // adapted from https://github.com/blacksmithgu/obsidian-dataview/blob/b497968fd7ccfe4241011840a8a2eb6afb1c84f7/src/ui/lp-render.ts#L44
 function selectionAndRangeOverlap(selection: EditorSelection, rangeFrom: number, rangeTo: number) {
@@ -57,16 +62,20 @@ class HabitPreviewPlugin implements PluginValue {
             const start = node.from;
             const end = node.to;
 
+            const text = view.state.doc.sliceString(start, end);
+            if (!PREFIX_REGEX.test(text)) return
+
             // don't continue if current cursor position and inline code node (including formatting
             // symbols) overlap
             // ensure that the update method resets on selectionSet for this to work.
             if (selectionAndRangeOverlap(view.state.selection, start - 1, end + 1)) return;
 
-            const text = view.state.doc.sliceString(start, end);
+            const args = text.substring(INLINE_PREFIX.length).trim().split(" ")
+            const habit = args[0]
 
             widgets.push(
               Decoration.replace({
-                widget: new LastDoneWidget(text),
+                widget: new LastDoneWidget(habit),
                 inclusive: false,
                 block: false,
               }).range(start - 1, end + 1)

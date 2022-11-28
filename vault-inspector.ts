@@ -1,13 +1,9 @@
-import { getDateFormat } from "daily-notes-helper";
+import { getDateFormat } from "./daily-notes-helper";
 import moment from "moment";
 import { TFile } from "obsidian";
+import { escapeRegExp } from "./util";
 
 const HABIT_COMPLETE_REGEX_PREFIX = "\\[x\\]\\s";
-
-// provided by https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
-function escapeRegExp(str: string) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
 
 export function getFilesFromFolder(folder: string): Array<TFile> {
   const files = app.vault.getMarkdownFiles()
