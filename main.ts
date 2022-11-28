@@ -8,9 +8,13 @@ import {
 	PluginSettingTab,
 	Setting
 } from 'obsidian';
+import { getLastDateCompleted } from 'vault-inspector';
 import { habitPreviewPlugin } from "./editor-plugin";
 
 // Remember to rename these classes and interfaces!
+
+// todo this is a temporary constant
+const DAILY_NOTES_FOLDER = "100 General/Note of the Days"
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -28,7 +32,45 @@ export default class MyPlugin extends Plugin {
 
 		this.registerEditorExtension([habitPreviewPlugin]);
 
+		this.addRibbonIcon("info", "Calculate average file length", async () => {
+			const fileLength = await this.averageFileLength();
+			new Notice(`The average file length is ${fileLength} characters.`);
+		});
+
+		// This adds a simple command that can be triggered anywhere
+		this.addCommand({
+			id: 'habit-last-complete-modal',
+			name: 'Check when habit was last completed',
+			callback: () => {
+				new LastDoneModal(this.app, (result) => {
+					const date = getLastDateCompleted(this.app, DAILY_NOTES_FOLDER, result);
+					date.then(result => new Notice(result))
+					.catch(result => new Notice("An error occurred: " + result))
+				}).open();
+			}
+		});
+
 	}
+
+	async averageFileLength(): Promise<string | undefined> {
+		const { vault } = this.app;
+
+		const dailyNoteFiles = vault.getMarkdownFiles().filter(file => file.parent.path == "100 General/Note of the Days");
+
+		return dailyNoteFiles[0].name;
+
+		// const fileContents: string[] = await Promise.all(
+		// 	dailyNoteFiles.map((file) => vault.cachedRead(file))
+		// );
+
+		// let totalLength = 0;
+		// fileContents.forEach((content) => {
+		// 	totalLength += content.length;
+		// });
+
+		// return (totalLength / fileContents.length).toString();
+	}
+
 
 	onunload() {
 
@@ -43,20 +85,43 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
+class LastDoneModal extends Modal {
+	result: string;
+	onSubmit: (result: string) => void;
+
+	constructor(app: App, onSubmit: (result: string) => void) {
 		super(app);
+		this.onSubmit = onSubmit;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.setText('Woah!');
+
+		contentEl.createEl("h1", { text: "What is the habit?" });
+
+		new Setting(contentEl)
+			.setName("Habit")
+			.addText((text) =>
+				text.onChange((value) => {
+					this.result = value;
+				}));
+
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText("Submit")
+					.setCta()
+					.onClick(() => {
+						this.close();
+						this.onSubmit(this.result);
+					}));
 	}
 
 	onClose() {
-		const { contentEl } = this;
+		let { contentEl } = this;
 		contentEl.empty();
 	}
+
 }
 
 class SampleSettingTab extends PluginSettingTab {
