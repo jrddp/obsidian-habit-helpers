@@ -62,12 +62,11 @@ class HabitPreviewPlugin implements PluginValue {
             // ensure that the update method resets on selectionSet for this to work.
             if (selectionAndRangeOverlap(view.state.selection, start - 1, end + 1)) return;
 
-            // Position of the '-' or the '*'.
-            const listCharFrom = node.from;
+            const text = view.state.doc.sliceString(start, end);
 
             widgets.push(
               Decoration.replace({
-                widget: new LastDoneWidget(),
+                widget: new LastDoneWidget(text),
                 inclusive: false,
                 block: false,
               }).range(start - 1, end + 1)
