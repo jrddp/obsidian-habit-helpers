@@ -17,6 +17,11 @@ import { LastDoneWidget } from "./widgets";
 const INLINE_PREFIX = "!h"
 const PREFIX_REGEX = new RegExp("^" + escapeRegExp(INLINE_PREFIX) + "\\s+\\S", "m")
 
+enum HabitTarget {
+  same_line = "<",
+  above_line = "^"
+}
+
 // adapted from https://github.com/blacksmithgu/obsidian-dataview/blob/b497968fd7ccfe4241011840a8a2eb6afb1c84f7/src/ui/lp-render.ts#L44
 function selectionAndRangeOverlap(selection: EditorSelection, rangeFrom: number, rangeTo: number) {
   for (const range of selection.ranges) {
@@ -71,7 +76,19 @@ class HabitPreviewPlugin implements PluginValue {
             if (selectionAndRangeOverlap(view.state.selection, start - 1, end + 1)) return;
 
             const args = text.substring(INLINE_PREFIX.length).trim().split(" ")
-            const habit = args[0]
+            let habit = args[0]
+
+            // Use current or above line as the habit
+            if (habit == HabitTarget.same_line) {
+              const line = view.state.doc.lineAt(start)
+              habit = line.text.substring(0, line.text.length - (end - start + 2) - 1).substring(5).trim()
+              console.log("Habit: " + habit)
+            } else if (habit == HabitTarget.above_line) {
+              const cur_line_num = view.state.doc.lineAt(start).number
+              if (cur_line_num < 1) return
+              const line = view.state.doc.line(cur_line_num - 1)
+              habit = line.text.substring(5).trim()
+            }
 
             widgets.push(
               Decoration.replace({
