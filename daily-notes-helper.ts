@@ -22,7 +22,7 @@ export function getUnorderedDailyNotes() {
 
 export function getOrderedDailyNotes() {
   return getUnorderedDailyNotes().sort(
-    (a, b) => moment(a.basename, DATE_FORMAT).diff(moment(b.basename, DATE_FORMAT)))
+    (a, b) => moment(b.basename, DATE_FORMAT).diff(moment(a.basename, DATE_FORMAT)))
 }
 
 export function getDailyNotesBefore(date: string) {
