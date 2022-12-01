@@ -1,4 +1,4 @@
-import { getAllDailyNotes } from 'daily-notes-helper';
+import { getOrderedDailyNotes } from 'daily-notes-helper';
 import {
 	App,
 	Editor,

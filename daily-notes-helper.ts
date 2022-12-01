@@ -1,3 +1,5 @@
+import moment from 'moment';
+import { TFile } from 'obsidian';
 import { getFilesBeforeNote, getFilesFromFolder } from 'vault-inspector';
 
 // some functions adapted from https://github.com/liamcain/obsidian-periodic-notes/blob/main/src/settings/utils.ts
@@ -14,10 +16,15 @@ export function getDailyNotesFolder() {
   return DAILY_NOTES_FOLDER;
 }
 
-export function getAllDailyNotes() {
+export function getUnorderedDailyNotes() {
   return getFilesFromFolder(DAILY_NOTES_FOLDER);
 }
 
+export function getOrderedDailyNotes() {
+  return getUnorderedDailyNotes().sort(
+    (a, b) => moment(a.basename, DATE_FORMAT).diff(moment(b.basename, DATE_FORMAT)))
+}
+
 export function getDailyNotesBefore(date: string) {
-  return getFilesBeforeNote(getAllDailyNotes(), date);
+  return getFilesBeforeNote(getOrderedDailyNotes(), date);
 }

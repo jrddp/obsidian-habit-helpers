@@ -1,5 +1,5 @@
 import { EditorView, WidgetType } from "@codemirror/view";
-import { getAllDailyNotes, getDailyNotesBefore } from "daily-notes-helper";
+import { getOrderedDailyNotes, getDailyNotesBefore } from "daily-notes-helper";
 import { getLastDateCompleted, getTimeBetween } from "vault-inspector";
 
 export class LastDoneWidget extends WidgetType {
