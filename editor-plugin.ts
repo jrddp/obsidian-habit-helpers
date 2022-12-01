@@ -11,7 +11,7 @@ import {
   WidgetType,
 } from "@codemirror/view";
 import { escapeRegExp } from "./util";
-import { LastDoneWidget } from "./widgets";
+import { SmartSummaryWidget } from "./widgets";
 
 // todo make this an editable setting
 const INLINE_PREFIX = "!h"
@@ -82,7 +82,6 @@ class HabitPreviewPlugin implements PluginValue {
             if (habit == HabitTarget.same_line) {
               const line = view.state.doc.lineAt(start)
               habit = line.text.substring(0, line.text.length - (end - start + 2) - 1).substring(5).trim()
-              console.log("Habit: " + habit)
             } else if (habit == HabitTarget.above_line) {
               const cur_line_num = view.state.doc.lineAt(start).number
               if (cur_line_num < 1) return
@@ -92,7 +91,7 @@ class HabitPreviewPlugin implements PluginValue {
 
             widgets.push(
               Decoration.replace({
-                widget: new LastDoneWidget(habit),
+                widget: new SmartSummaryWidget(habit),
                 inclusive: false,
                 block: false,
               }).range(start - 1, end + 1)
