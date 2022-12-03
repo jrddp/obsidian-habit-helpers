@@ -6,3 +6,14 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.habit-summary {
+  font-size: smaller;
+}
+
+.habit-summary-positive {
+  color: var(--green);
+}
+
+.habit-summary-negative {
+  color: var(--red);
+}

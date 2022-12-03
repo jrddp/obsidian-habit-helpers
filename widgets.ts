@@ -24,7 +24,7 @@ export class SmartSummaryWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const span = document.createElement("small");
+    const span = createSpan({cls: ["habit-summary"]});
 
     const fname = app.workspace.getActiveFile()?.basename;
     if (fname == undefined) return span;
@@ -33,8 +33,10 @@ export class SmartSummaryWidget extends WidgetType {
     summaryResponse.then(result => {
       if (result.type == SMART_SUMMARY_TYPE.LAST_COMPLETED) {
         span.innerText = getLastCompletedText(result.date, fname)
+        span.classList.add("habit-summary-negative")
       } else {
         span.innerText = getStreakText(result.date, fname)
+        span.classList.add("habit-summary-positive")
       }
     }).catch(result => {
       span.innerText = "An error has occured: " + result;
