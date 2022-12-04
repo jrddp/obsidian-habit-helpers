@@ -30,7 +30,6 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.registerEditorExtension([habitPreviewPlugin]);
-
 	}
 
 	onunload() {
