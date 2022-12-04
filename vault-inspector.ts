@@ -26,14 +26,12 @@ export async function getSmartSummaryDate(files: Array<TFile>, habit: string): P
   const firstFile = files[0];
   // habit completed day before -> streak, otherwise, last completed
   if (await isHabitComplete(firstFile, habit)) {
-    console.log("Habit: " + habit + " was on a STREAK. First file: " + firstFile.name)
     return {
       type: SMART_SUMMARY_TYPE.STREAK,
       date: await getFirstDateOfStreak(files, habit)
     };
   }
   else {
-    console.log("Habit: " + habit + " was NOT on a streak. First file: " + firstFile.name)
     return {
       type: SMART_SUMMARY_TYPE.LAST_COMPLETED,
       date: await getLastDateCompleted(files, habit)
