@@ -74,7 +74,6 @@ export async function getTimesCompletedInPastNDays(files: Array<TFile>, habit: s
       count++
     }
   }
-  console.log("Times " + habit + " completed in past " + interval + " days: " + count)
   return count;
 }
 
