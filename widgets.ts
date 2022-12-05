@@ -75,13 +75,14 @@ export class LastDoneWidget extends WidgetType {
 }
 
 function addPieChart(container: HTMLElement, total: number, affirmative: number) {
-    const size = 16
-    const width = size, height = size
-    const ri = size/4, ro = size/2;
-
-
     const style = getComputedStyle(container)
     const colors = d3.scaleOrdinal([style.color, style.accentColor])
+    // font size is in the form "##px"
+    // TODO for this to properly update, widgets should be reloaded upon rescale
+    const size = Number(style.fontSize.substring(0, style.fontSize.length - 2))
+
+    const width = size, height = size
+    const ri = size/4, ro = size/2;
 
     let svg = d3.select(container).append("svg");
 
@@ -91,13 +92,12 @@ function addPieChart(container: HTMLElement, total: number, affirmative: number)
       { status: "completed", number: affirmative }, { status: "not complete", number: (total - affirmative) },
     ];
     let data = d3.pie().sort(null).value(d => d.number)(details);
-    console.log(data);
 
     let segments = d3.arc().innerRadius(ri).outerRadius(ro)
       .padAngle(0.05).padRadius(0);
 
     let sections = svg.append("g")
-    .attr("transform", "translate(8, 8)")
+    .attr("transform", "translate(" + size/2 + "," + size/2 + ")")
       .selectAll("path").data(data);
     sections.enter().append("path").attr("d", segments).attr("fill", (d) => colors(d.data.number));
 }
