@@ -78,7 +78,10 @@ function addPieChart(container: HTMLElement, total: number, affirmative: number)
     const size = 16
     const width = size, height = size
     const ri = size/4, ro = size/2;
-    const colors = d3.scaleOrdinal(d3.schemeDark2)
+
+
+    const style = getComputedStyle(container)
+    const colors = d3.scaleOrdinal([style.color, style.accentColor])
 
     let svg = d3.select(container).append("svg");
 
