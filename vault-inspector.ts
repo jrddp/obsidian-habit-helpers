@@ -66,6 +66,18 @@ export async function getLastDateCompleted(files: Array<TFile>, habit: string) {
   return null;
 }
 
+export async function getTimesCompletedInPastNDays(files: Array<TFile>, habit: string, interval: number) {
+  let count = 0
+  for (let i = 0; i < interval; i++) {
+    let file = files[i];
+    if (await isHabitComplete(file, habit)) {
+      count++
+    }
+  }
+  console.log("Times " + habit + " completed in past " + interval + " days: " + count)
+  return count;
+}
+
 export async function getFirstDateOfStreak(files: Array<TFile>, habit: string) {
   let firstDateFile = null;
   for (let i = 0; i < files.length; i++) {

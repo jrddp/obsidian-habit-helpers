@@ -1,7 +1,7 @@
 import { EditorView, WidgetType } from "@codemirror/view";
 import * as d3 from "d3";
 import { getOrderedDailyNotes, getDailyNotesBefore } from "daily-notes-helper";
-import { getLastDateCompleted, getSmartSummaryDate, getTimeBetween, SMART_SUMMARY_TYPE } from "vault-inspector";
+import { getLastDateCompleted, getSmartSummaryDate, getTimeBetween, getTimesCompletedInPastNDays, SMART_SUMMARY_TYPE } from "vault-inspector";
 
 function getLastCompletedText(result: string | null, fileName: string) {
   let time_since;
@@ -74,6 +74,31 @@ export class LastDoneWidget extends WidgetType {
 
 }
 
+function addPieChart(container: HTMLElement, total: number, affirmative: number) {
+    const size = 16
+    const width = size, height = size
+    const ri = size/4, ro = size/2;
+    const colors = d3.scaleOrdinal(d3.schemeDark2)
+
+    let svg = d3.select(container).append("svg");
+
+    svg.attr("width", width).attr("height", height);
+
+    let details = [
+      { status: "completed", number: affirmative }, { status: "not complete", number: (total - affirmative) },
+    ];
+    let data = d3.pie().sort(null).value(d => d.number)(details);
+    console.log(data);
+
+    let segments = d3.arc().innerRadius(ri).outerRadius(ro)
+      .padAngle(0.05).padRadius(0);
+
+    let sections = svg.append("g")
+    .attr("transform", "translate(8, 8)")
+      .selectAll("path").data(data);
+    sections.enter().append("path").attr("d", segments).attr("fill", (d) => colors(d.data.number));
+}
+
 export class PieChartWidget extends WidgetType {
   habit: string;
 
@@ -83,9 +108,17 @@ export class PieChartWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const span = createSpan({ cls: ["habit-piechart"] });
+    const timeInterval = 7 // days
+    const fname = app.workspace.getActiveFile()?.basename;
 
-    d3.select(span).append("svg")
+    const span = createSpan({ cls: ["habit-piechart"] });
+    if (fname == undefined) return span;
+
+    const daysCompleted = getTimesCompletedInPastNDays(getDailyNotesBefore(fname), this.habit, timeInterval)
+
+    daysCompleted.then(result => {
+      addPieChart(span, timeInterval, result)
+    })
 
     return span;
   }
