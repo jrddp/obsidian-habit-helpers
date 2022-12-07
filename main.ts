@@ -30,6 +30,11 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.registerEditorExtension([habitPreviewPlugin]);
+
+		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
+			
+		});
+
 	}
 
 	onunload() {
