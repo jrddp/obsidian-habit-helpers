@@ -103,16 +103,17 @@ class HabitPreviewPlugin implements PluginValue {
               habit = habit.substring(argEnd);
             }
             habit = habit.trim();
+            const line = view.state.doc.lineAt(start);
+            const habitDone = line.text.substring(0, 5).contains("[x]")
 
             // Use current or above line as the habit
             if (habit == HabitTarget.same_line) {
-              const line = view.state.doc.lineAt(start);
               habit = getHabitFromLine(line.text)
             } else if (habit == HabitTarget.above_line) {
               const cur_line_num = view.state.doc.lineAt(start).number;
               if (cur_line_num < 1) return;
-              const line = view.state.doc.line(cur_line_num - 1);
-              habit = getHabitFromLine(line.text)
+              const prevLine = view.state.doc.line(cur_line_num - 1);
+              habit = getHabitFromLine(prevLine.text)
             }
 
             let widget;
@@ -121,7 +122,7 @@ class HabitPreviewPlugin implements PluginValue {
                 widget = new LastDoneWidget(habit);
                 break;
               case InlineArgs.PieChart:
-                widget = new PieChartWidget(habit);
+                widget = new PieChartWidget(habit, habitDone);
                 break;
               case InlineArgs.SmartSum:
               default:

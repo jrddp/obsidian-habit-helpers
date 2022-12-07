@@ -75,53 +75,56 @@ export class LastDoneWidget extends WidgetType {
 }
 
 function addPieChart(container: HTMLElement, total: number, affirmative: number) {
-    const style = getComputedStyle(container)
-    const colors = d3.scaleOrdinal([style.color, style.accentColor])
-    // font size is in the form "##px"
-    // TODO for this to properly update, widgets should be reloaded upon rescale
-    const size = Number(style.fontSize.substring(0, style.fontSize.length - 2))
+  const style = getComputedStyle(container);
+  const colors = d3.scaleOrdinal([style.color, style.accentColor]);
+  // font size is in the form "##px"
+  // TODO for this to properly update, widgets should be reloaded upon rescale
+  const size = Number(style.fontSize.substring(0, style.fontSize.length - 2));
 
-    const width = size, height = size
-    const ri = size/4, ro = size/2;
+  const width = size, height = size;
+  const ri = size / 4, ro = size / 2;
 
-    let svg = d3.select(container).append("svg");
+  let svg = d3.select(container).append("svg");
 
-    svg.attr("width", width).attr("height", height);
+  svg.attr("width", width).attr("height", height);
 
-    let details = [
-      { status: "completed", number: affirmative }, { status: "not complete", number: (total - affirmative) },
-    ];
-    let data = d3.pie().sort(null).value(d => d.number)(details);
+  let details = [
+    { status: "completed", number: affirmative }, { status: "not complete", number: (total - affirmative) },
+  ];
+  let data = d3.pie().sort(null).value(d => d.number)(details);
 
-    let segments = d3.arc().innerRadius(ri).outerRadius(ro)
-      .padAngle(0.05).padRadius(0);
+  let segments = d3.arc().innerRadius(ri).outerRadius(ro)
+    .padAngle(0.05).padRadius(0);
 
-    let sections = svg.append("g")
-    .attr("transform", "translate(" + size/2 + "," + size/2 + ")")
-      .selectAll("path").data(data);
-    sections.enter().append("path").attr("d", segments).attr("fill", (d) => colors(d.data.number));
+  let sections = svg.append("g")
+    .attr("transform", "translate(" + size / 2 + "," + size / 2 + ")")
+    .selectAll("path").data(data);
+  sections.enter().append("path").attr("d", segments).attr("fill", (d) => colors(d.data.number));
 }
 
 export class PieChartWidget extends WidgetType {
   habit: string;
+  curDayDone: boolean;
 
-  constructor(habit: string) {
+  constructor(habit: string, curDayDone: boolean) {
     super();
     this.habit = habit;
+    this.curDayDone = curDayDone;
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const timeInterval = 7 // days
+    const timeInterval = 7; // days
     const fname = app.workspace.getActiveFile()?.basename;
 
     const span = createSpan({ cls: ["habit-piechart"] });
     if (fname == undefined) return span;
 
-    const daysCompleted = getTimesCompletedInPastNDays(getDailyNotesBefore(fname), this.habit, timeInterval)
+    let daysCompleted = getTimesCompletedInPastNDays(getDailyNotesBefore(fname), this.habit, timeInterval - 1);
 
     daysCompleted.then(result => {
-      addPieChart(span, timeInterval, result)
-    })
+      if (this.curDayDone) result += 1;
+      addPieChart(span, timeInterval, result);
+    });
 
     return span;
   }
