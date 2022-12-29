@@ -61,7 +61,7 @@ class HabitPreviewPlugin implements PluginValue {
   }
 
   update(update: ViewUpdate) {
-    if (update.docChanged || update.viewportChanged || update.selectionSet) {
+    if (update.docChanged || update.viewportChanged || update.selectionSet || update.focusChanged) {
       this.decorations = this.buildDecorations(update.view);
     }
   }
@@ -69,6 +69,9 @@ class HabitPreviewPlugin implements PluginValue {
   destroy() { }
 
   buildDecorations(view: EditorView): DecorationSet {
+    const currentFile = app.workspace.getActiveFile();
+    if (!currentFile) return Decoration.none;
+
     const widgets: Range<Decoration>[] = [];
 
     for (let { from, to } of view.visibleRanges) {

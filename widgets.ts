@@ -24,6 +24,11 @@ export class SmartSummaryWidget extends WidgetType {
     this.habit = habit;
   }
 
+  eq(other: WidgetType): boolean {
+      if (!(other instanceof SmartSummaryWidget)) return false
+      return other.habit == this.habit
+  }
+
   toDOM(view: EditorView): HTMLElement {
     const span = createSpan({ cls: ["habit-summary"] });
 
@@ -54,6 +59,11 @@ export class LastDoneWidget extends WidgetType {
   constructor(habit: string) {
     super();
     this.habit = habit;
+  }
+
+  eq(other: WidgetType): boolean {
+      if (!(other instanceof LastDoneWidget)) return false
+      return other.habit == this.habit
   }
 
   toDOM(view: EditorView): HTMLElement {
@@ -110,6 +120,11 @@ export class PieChartWidget extends WidgetType {
     super();
     this.habit = habit;
     this.curDayDone = curDayDone;
+  }
+
+  eq(other: WidgetType): boolean {
+      if (!(other instanceof PieChartWidget)) return false
+      return other.habit == this.habit && other.curDayDone == this.curDayDone
   }
 
   toDOM(view: EditorView): HTMLElement {
