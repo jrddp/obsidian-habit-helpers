@@ -23,9 +23,13 @@ let inlineArgsVals = Object.values(InlineArgs).map(a => escapeRegExp(a));
 
 // todo make this an editable setting
 const INLINE_PREFIX = "!h";
-const CONTENT_PREFIX_REGEX_STR = escapeRegExp(INLINE_PREFIX) + "(?:" + inlineArgsVals.join("|") + "|)" + "\\s+\\S"
-const PREFIX_REGEX = new RegExp("^" + CONTENT_PREFIX_REGEX_STR, "m");
-const CONTENT_REGEX = new RegExp("`" + CONTENT_PREFIX_REGEX_STR + "+.*`", "m")
+const WIDGET_PREFIX_REGEX_STR = escapeRegExp(INLINE_PREFIX) + "(?:" + inlineArgsVals.join("|") + "|)" + "\\s+\\S"
+const WIDGET_REGEX_STR = "`" + WIDGET_PREFIX_REGEX_STR + "+.*`"
+
+const PREFIX_REGEX = new RegExp("^" + WIDGET_PREFIX_REGEX_STR, "m");
+// matches valid widget text such as `!h <`
+const WIDGET_REGEX = new RegExp(WIDGET_REGEX_STR, "m")
+const HABIT_REGEX = new RegExp("(?:> )?(?:- \\[.?\\])\\s*(.*?)\\s*(?:" + WIDGET_REGEX_STR + ")*$")
 
 enum HabitTarget {
   same_line = "<",
@@ -44,13 +48,11 @@ function selectionAndRangeOverlap(selection: EditorSelection, rangeFrom: number,
 }
 
 function getHabitFromLine(text: string) {
-  const searchMatch = CONTENT_REGEX.exec(text)
-  let firstPreviewIndex
-  if (!searchMatch || searchMatch.length < 1) firstPreviewIndex = text.length
-  else firstPreviewIndex = text.indexOf(searchMatch[0])
-  // substring 5 from assumption of "- [x]" prefix or "- [ ]" prefix (also works with "- []")
-  const habit = text.substring(0, firstPreviewIndex).substring(5).trim();
-  return habit
+  const match = text.match(HABIT_REGEX)
+  if (!match || match?.length <= 1) {
+    return ""
+  }
+  return match[1]
 }
 
 class HabitPreviewPlugin implements PluginValue {

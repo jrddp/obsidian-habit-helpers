@@ -50,6 +50,7 @@ export function getFilesBeforeNote(files: Array<TFile>, note_name: string): Arra
 }
 
 export async function isHabitComplete(file: TFile, habit: string): Promise<boolean> {
+  
   const regexStr = HABIT_COMPLETE_REGEX_PREFIX + escapeRegExp(habit);
   const regex = new RegExp(regexStr, "gm");
   const fileContents = await app.vault.cachedRead(file);
