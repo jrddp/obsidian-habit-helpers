@@ -97,8 +97,8 @@ export function getTimeBetween(date_old_str: string, date_new_str: string) {
 export function getTimeSince(date_old_str: string) {
   const date_format = getDateFormat();
   const date_old = moment(date_old_str, date_format);
-  let result = date_old.fromNow()
-  if (result.contains("hours ago")) {
+  let result = date_old.from(moment().startOf("day"))
+  if (result == "a few seconds ago") {
     result = "Today"
   } else if (result == "a day ago") {
     result = "Yesterday"
