@@ -1,7 +1,7 @@
 import { EditorView, WidgetType } from "@codemirror/view";
 import * as d3 from "d3";
 import { getOrderedDailyNotes, getDailyNotesBefore } from "daily-notes-helper";
-import { getLastDateCompleted, getSmartSummaryDate, getTimeBetween, getTimesCompletedInPastNDays, SMART_SUMMARY_TYPE } from "vault-inspector";
+import { getLastDateCompleted, getSmartSummaryDate, getTimeBetween, getTimesCompletedInPastNDays, getTimeSince, SMART_SUMMARY_TYPE } from "vault-inspector";
 
 function getLastCompletedText(result: string | null, fileName: string) {
   let time_since;
@@ -25,8 +25,8 @@ export class SmartSummaryWidget extends WidgetType {
   }
 
   eq(other: WidgetType): boolean {
-      if (!(other instanceof SmartSummaryWidget)) return false
-      return other.habit == this.habit
+    if (!(other instanceof SmartSummaryWidget)) return false;
+    return other.habit == this.habit;
   }
 
   toDOM(view: EditorView): HTMLElement {
@@ -62,8 +62,8 @@ export class LastDoneWidget extends WidgetType {
   }
 
   eq(other: WidgetType): boolean {
-      if (!(other instanceof LastDoneWidget)) return false
-      return other.habit == this.habit
+    if (!(other instanceof LastDoneWidget)) return false;
+    return other.habit == this.habit;
   }
 
   toDOM(view: EditorView): HTMLElement {
@@ -123,8 +123,8 @@ export class PieChartWidget extends WidgetType {
   }
 
   eq(other: WidgetType): boolean {
-      if (!(other instanceof PieChartWidget)) return false
-      return other.habit == this.habit && other.curDayDone == this.curDayDone
+    if (!(other instanceof PieChartWidget)) return false;
+    return other.habit == this.habit && other.curDayDone == this.curDayDone;
   }
 
   toDOM(view: EditorView): HTMLElement {
@@ -143,5 +143,26 @@ export class PieChartWidget extends WidgetType {
 
     return span;
   }
+
+}
+
+export class RelativeDateWidget extends WidgetType {
+
+  eq(other: WidgetType): boolean {
+    return (other instanceof RelativeDateWidget);
+  }
+
+  toDOM(view: EditorView): HTMLElement {
+    const fname = app.workspace.getActiveFile()?.basename;
+
+    const span = createSpan({ cls: ["habit-reldate"] });
+    if (fname == undefined) return span;
+
+    const time_since = getTimeSince(fname);
+
+    span.innerText = time_since
+    return span;
+  }
+
 
 }

@@ -12,24 +12,25 @@ import {
 } from "@codemirror/view";
 import { isObjectLiteralElement } from "typescript";
 import { escapeRegExp } from "./util";
-import { LastDoneWidget, PieChartWidget, SmartSummaryWidget } from "./widgets";
+import { LastDoneWidget, PieChartWidget, RelativeDateWidget, SmartSummaryWidget } from "./widgets";
 
 enum InlineArgs {
   LastDone = 'l',
   SmartSum = 's',
-  PieChart = 'p'
+  PieChart = 'p',
+  RelDate = 'd'
 }
 let inlineArgsVals = Object.values(InlineArgs).map(a => escapeRegExp(a));
 
 // todo make this an editable setting
 const INLINE_PREFIX = "!h";
-const WIDGET_PREFIX_REGEX_STR = escapeRegExp(INLINE_PREFIX) + "(?:" + inlineArgsVals.join("|") + "|)" + "\\s+\\S"
-const WIDGET_REGEX_STR = "`" + WIDGET_PREFIX_REGEX_STR + "+.*`"
+const WIDGET_PREFIX_REGEX_STR = escapeRegExp(INLINE_PREFIX) + "(?:" + inlineArgsVals.join("|") + "|)";
+const WIDGET_REGEX_STR = "`" + WIDGET_PREFIX_REGEX_STR + "+.*`";
 
 const PREFIX_REGEX = new RegExp("^" + WIDGET_PREFIX_REGEX_STR, "m");
 // matches valid widget text such as `!h <`
-const WIDGET_REGEX = new RegExp(WIDGET_REGEX_STR, "m")
-const HABIT_REGEX = new RegExp("(?:> )?(?:- \\[.?\\])\\s*(.*?)\\s*(?:" + WIDGET_REGEX_STR + ")*$")
+const WIDGET_REGEX = new RegExp(WIDGET_REGEX_STR, "m");
+const HABIT_REGEX = new RegExp("(?:> )?(?:- \\[.?\\])\\s*(.*?)\\s*(?:" + WIDGET_REGEX_STR + ")*$");
 
 enum HabitTarget {
   same_line = "<",
@@ -48,11 +49,11 @@ function selectionAndRangeOverlap(selection: EditorSelection, rangeFrom: number,
 }
 
 function getHabitFromLine(text: string) {
-  const match = text.match(HABIT_REGEX)
+  const match = text.match(HABIT_REGEX);
   if (!match || match?.length <= 1) {
-    return ""
+    return "";
   }
-  return match[1]
+  return match[1];
 }
 
 class HabitPreviewPlugin implements PluginValue {
@@ -103,22 +104,23 @@ class HabitPreviewPlugin implements PluginValue {
             let typeArg = "";
             let habit = text.substring(INLINE_PREFIX.length);
             if (!habit.startsWith(" ")) {
-              const argEnd = habit.indexOf(" ");
+              let argEnd = habit.indexOf(" ");
+              if (argEnd == -1) argEnd = habit.length
               typeArg = habit.substring(0, argEnd);
               habit = habit.substring(argEnd);
             }
             habit = habit.trim();
             const line = view.state.doc.lineAt(start);
-            const habitDone = line.text.substring(0, 5).contains("[x]")
+            const habitDone = line.text.substring(0, 5).contains("[x]");
 
             // Use current or above line as the habit
             if (habit == HabitTarget.same_line) {
-              habit = getHabitFromLine(line.text)
+              habit = getHabitFromLine(line.text);
             } else if (habit == HabitTarget.above_line) {
               const cur_line_num = view.state.doc.lineAt(start).number;
               if (cur_line_num < 1) return;
               const prevLine = view.state.doc.line(cur_line_num - 1);
-              habit = getHabitFromLine(prevLine.text)
+              habit = getHabitFromLine(prevLine.text);
             }
 
             let widget;
@@ -128,6 +130,9 @@ class HabitPreviewPlugin implements PluginValue {
                 break;
               case InlineArgs.PieChart:
                 widget = new PieChartWidget(habit, habitDone);
+                break;
+              case InlineArgs.RelDate:
+                widget = new RelativeDateWidget();
                 break;
               case InlineArgs.SmartSum:
               default:

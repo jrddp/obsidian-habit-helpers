@@ -22,3 +22,7 @@ If your plugin does not need CSS, delete this file.
   color: var(--green);
   accent-color: var(--red);
 }
+
+.habit-reldate {
+  
+}
