@@ -18,11 +18,23 @@ If your plugin does not need CSS, delete this file.
   color: var(--red);
 }
 
+.habit-summary-focused {
+  font-weight: bold;
+}
+
+.habit-lastdone {
+  font-size: smaller;
+}
+
 .habit-piechart {
   color: var(--green);
   accent-color: var(--red);
 }
 
-.habit-reldate {
-  
+.habit-piechart-tooltip {
+  background-color: var(--background-secondary);
+  padding: 2px;
+  border-radius: 4px;
 }
+
+.habit-reldate {}

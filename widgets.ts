@@ -1,7 +1,9 @@
 import { EditorView, WidgetType } from "@codemirror/view";
 import * as d3 from "d3";
 import { getOrderedDailyNotes, getDailyNotesBefore } from "daily-notes-helper";
-import { getLastDateCompleted, getSmartSummaryDate, getTimeBetween, getTimesCompletedInPastNDays, getTimeSince, SMART_SUMMARY_TYPE } from "vault-inspector";
+import { getCompletionInPastNDays, getLastDateCompleted, getSmartSummaryDate, getTimeBetween, getTimeSince, SMART_SUMMARY_TYPE } from "vault-inspector";
+import moment from "moment";
+import tippy from 'tippy.js';
 
 function getLastCompletedText(result: string | null, fileName: string) {
   let time_since;
@@ -67,7 +69,7 @@ export class LastDoneWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const span = document.createElement("small");
+    const span = createSpan({ cls: ["habit-lastdone"] });
 
     const fname = app.workspace.getActiveFile()?.basename;
     if (fname == undefined) return span;
@@ -128,17 +130,36 @@ export class PieChartWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const timeInterval = 7; // days
+    const n = 7; // days
     const fname = app.workspace.getActiveFile()?.basename;
 
     const span = createSpan({ cls: ["habit-piechart"] });
     if (fname == undefined) return span;
 
-    let daysCompleted = getTimesCompletedInPastNDays(getDailyNotesBefore(fname), this.habit, timeInterval - 1);
+    const tooltip = createSpan({ cls: ["habit-piechart-tooltip"] });
 
-    daysCompleted.then(result => {
-      if (this.curDayDone) result += 1;
-      addPieChart(span, timeInterval, result);
+    let days = getCompletionInPastNDays(getDailyNotesBefore(fname), this.habit, n - 1);
+
+    days.then(res => {
+      res.push(this.curDayDone);
+      let count = res.reduce((acc, val) => acc + (val ? 1 : 0), 0);
+      addPieChart(span, n, count);
+
+      res.forEach((val, i) => {
+        let curEl = createSpan();
+        const daysAgo = n - i - 1;
+
+        curEl.addClass(val ? "habit-summary-positive" : "habit-summary-negative");
+        if (daysAgo == 0) curEl.addClass("habit-summary-focused");
+
+        curEl.setText(moment(fname).subtract(daysAgo, "days").format("dd"));
+        tooltip.appendChild(curEl);
+      });
+
+      tippy(span, {
+        content: tooltip,
+      });
+
     });
 
     return span;
@@ -160,7 +181,7 @@ export class RelativeDateWidget extends WidgetType {
 
     const time_since = getTimeSince(fname);
 
-    span.innerText = time_since
+    span.innerText = time_since;
     return span;
   }
 

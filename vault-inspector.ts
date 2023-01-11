@@ -67,15 +67,14 @@ export async function getLastDateCompleted(files: Array<TFile>, habit: string) {
   return null;
 }
 
-export async function getTimesCompletedInPastNDays(files: Array<TFile>, habit: string, interval: number) {
-  let count = 0
-  for (let i = 0; i < interval; i++) {
+// returns array of booleans of len n, [0] being the least recent 
+export async function getCompletionInPastNDays(files: Array<TFile>, habit: string, n: number) {
+  const days = []
+  for (let i = n - 1; i >= 0; i--) {
     let file = files[i];
-    if (await isHabitComplete(file, habit)) {
-      count++
-    }
+    days.push(await isHabitComplete(file, habit))
   }
-  return count;
+  return days;
 }
 
 export async function getFirstDateOfStreak(files: Array<TFile>, habit: string) {
