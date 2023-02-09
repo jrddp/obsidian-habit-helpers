@@ -11,11 +11,11 @@ If your plugin does not need CSS, delete this file.
 }
 
 .habit-summary-positive {
-  color: var(--green);
+  color: var(--color-green);
 }
 
 .habit-summary-negative {
-  color: var(--red);
+  color: var(--color-red);
 }
 
 .habit-summary-focused {
@@ -27,8 +27,8 @@ If your plugin does not need CSS, delete this file.
 }
 
 .habit-piechart {
-  color: var(--green);
-  accent-color: var(--red);
+  color: var(--color-green);
+  accent-color: var(--color-red);
 }
 
 .habit-piechart-tooltip {
