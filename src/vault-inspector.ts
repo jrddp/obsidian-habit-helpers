@@ -1,7 +1,8 @@
-import { getDateFormat } from "./daily-notes-helper";
+import { getDateFormat, getDailyNotesFolder } from "./daily-notes-helper";
 import moment from "moment";
-import { TFile } from "obsidian";
+import { TAbstractFile, TFile } from "obsidian";
 import { escapeRegExp } from "./util";
+import path from "path"
 
 const HABIT_COMPLETE_REGEX_PREFIX = "\\[x\\]\\s";
 
@@ -75,18 +76,24 @@ export async function getLastDateCompleted(files: Array<TFile>, habit: string) {
 	return null;
 }
 
-// returns array of booleans of len n, [0] being the least recent
 export async function getCompletionInPastNDays(
-	files: Array<TFile>,
+	currentFile: string,
 	habit: string,
 	n: number
-) {
-	const days = [];
+): Promise<boolean[]> {
+
+	const dateFormat = getDateFormat();
+	const folder = getDailyNotesFolder();
+	const currentDate = moment(currentFile, dateFormat);
+	const pastDays = [];
 	for (let i = n - 1; i >= 0; i--) {
-		let file = files[i];
-		days.push(await isHabitComplete(file, habit));
+		const pastDate = currentDate.clone().subtract(i, 'days');
+		const formattedDate = pastDate.format(dateFormat);
+		const file = app.vault.getAbstractFileByPath(`${folder}${path.sep}${formattedDate}.md`);
+		const isComplete = file instanceof TFile ? await isHabitComplete(file, habit) : false;
+		pastDays.push(isComplete);
 	}
-	return days;
+	return pastDays;
 }
 
 export async function getFirstDateOfStreak(files: Array<TFile>, habit: string) {

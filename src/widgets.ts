@@ -176,8 +176,8 @@ export class PieChartWidget extends WidgetType {
 
 		const tooltip = createSpan({ cls: ["habit-piechart-tooltip"] });
 
-		let days = getCompletionInPastNDays(
-			getDailyNotesBefore(fname),
+		const days = getCompletionInPastNDays(
+			fname,
 			this.habit,
 			n - 1
 		);
