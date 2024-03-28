@@ -25,6 +25,7 @@
 	"dependencies": {
 		"@codemirror/language": "^6.3.1",
 		"d3": "^6.5.0",
+		"obsidian-daily-notes-interface": "^0.9.4",
 		"tippy.js": "^6.3.7"
 	}
 }
