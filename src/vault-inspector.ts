@@ -86,7 +86,7 @@ export async function getCompletionInPastNDays(
 	const folder = getDailyNotesFolder();
 	const currentDate = moment(currentFile, dateFormat);
 	const pastDays = [];
-	for (let i = n - 1; i >= 0; i--) {
+	for (let i = n; i > 0; i--) {
 		const pastDate = currentDate.clone().subtract(i, 'days');
 		const formattedDate = pastDate.format(dateFormat);
 		const file = app.vault.getAbstractFileByPath(`${folder}${path.sep}${formattedDate}.md`);
