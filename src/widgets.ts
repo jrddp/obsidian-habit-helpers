@@ -131,6 +131,7 @@ function addPieChart(
 	let data = d3
 		.pie()
 		.sort(null)
+	// @ts-ignore
 		.value((d) => d.number)(details);
 
 	let segments = d3
@@ -148,7 +149,9 @@ function addPieChart(
 	sections
 		.enter()
 		.append("path")
+	// @ts-ignore
 		.attr("d", segments)
+	// @ts-ignore
 		.attr("fill", (d) => colors(d.data.number));
 }
 
