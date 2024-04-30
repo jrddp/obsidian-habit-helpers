@@ -20,26 +20,23 @@ import {
 } from "./widgets";
 
 enum InlineArgs {
-	LastDone = "lastdone",
-	SmartSum = "summary",
-	PieChart = "pie",
-	RelDate = "reldate",
+	LastDone = "l",
+	SmartSum = "s",
+	PieChart = "p",
+	RelDate = "d",
 }
 let inlineArgsVals = Object.values(InlineArgs).map((a) => escapeRegExp(a));
 
-const INLINE_PREFIX = "!hh";
+const INLINE_PREFIX = "!h";
+const WIDGET_PREFIX_REGEX_STR =
+	escapeRegExp(INLINE_PREFIX) + "(?:" + inlineArgsVals.join("|") + "|)";
+const WIDGET_REGEX_STR = "`" + WIDGET_PREFIX_REGEX_STR + "+.*`";
 
-// matches valid widget content, optional group  1: widget type, optional group 2: target habit
-const HH_REGEX = new RegExp(
-	`^${escapeRegExp(INLINE_PREFIX)}(?: (${inlineArgsVals.join(
-		"|"
-	)})(?: (\\^|<|"[^"]*"))?)?$`,
-	"m"
-);
-// matches any line, group 1 is the name of the habit (ignores any habit helper widgets).
+const PREFIX_REGEX = new RegExp("^" + WIDGET_PREFIX_REGEX_STR, "m");
+// matches valid widget text such as `!h <`
+const WIDGET_REGEX = new RegExp(WIDGET_REGEX_STR, "m");
 const HABIT_REGEX = new RegExp(
-	"(?:> )?(?:- \\[.?\\])\\s*(.*?)(?:\\s`.*`.*)?$",
-	"m"
+	"(?:> )?(?:- \\[.?\\])\\s*(.*?)\\s*(?:" + WIDGET_REGEX_STR + ")*$"
 );
 
 enum HabitTarget {
@@ -70,7 +67,7 @@ function getHabitFromLine(text: string) {
 	return match[1];
 }
 
-class HabitPreviewPlugin implements PluginValue {
+class HabitPreviewPluginLegacy implements PluginValue {
 	decorations: DecorationSet;
 
 	constructor(view: EditorView) {
@@ -105,7 +102,6 @@ class HabitPreviewPlugin implements PluginValue {
 
 					if (type.name.includes("formatting")) return;
 
-					// check if node is inline code (`text`)
 					const regex = new RegExp(".*?_?inline-code_?.*");
 					if (regex.test(type.name)) {
 						// contains the position of inline code
@@ -113,11 +109,11 @@ class HabitPreviewPlugin implements PluginValue {
 						const end = node.to;
 
 						const text = view.state.doc.sliceString(start, end);
-						
-						const hh_match = text.match(HH_REGEX);
-						if (hh_match == null) return;
+						if (!PREFIX_REGEX.test(text)) return;
 
-						// don't render widget if the cursor is in the inline code
+						// don't continue if current cursor position and inline code node (including formatting
+						// symbols) overlap
+						// ensure that the update method resets on selectionSet for this to work.
 						if (
 							selectionAndRangeOverlap(
 								view.state.selection,
@@ -127,19 +123,24 @@ class HabitPreviewPlugin implements PluginValue {
 						)
 							return;
 
-						const typeArg = hh_match[1] ?? InlineArgs.SmartSum;
-						const targetArg = hh_match[2] ?? HabitTarget.same_line;
+						let typeArg = "";
+						let habit = text.substring(INLINE_PREFIX.length);
+						if (!habit.startsWith(" ")) {
+							let argEnd = habit.indexOf(" ");
+							if (argEnd == -1) argEnd = habit.length;
+							typeArg = habit.substring(0, argEnd);
+							habit = habit.substring(argEnd);
+						}
+						habit = habit.trim();
 						const line = view.state.doc.lineAt(start);
 						const habitDone = line.text
 							.substring(0, 5)
 							.contains("[x]");
 
-						let habit;
-
 						// Use current or above line as the habit
-						if (targetArg == HabitTarget.same_line) {
+						if (habit == HabitTarget.same_line) {
 							habit = getHabitFromLine(line.text);
-						} else if (targetArg == HabitTarget.above_line) {
+						} else if (habit == HabitTarget.above_line) {
 							const cur_line_num =
 								view.state.doc.lineAt(start).number;
 							if (cur_line_num < 1) return;
@@ -147,9 +148,6 @@ class HabitPreviewPlugin implements PluginValue {
 								cur_line_num - 1
 							);
 							habit = getHabitFromLine(prevLine.text);
-						} else {
-							// trim quotes
-							habit = targetArg.substring(1, targetArg.length - 1);
 						}
 
 						let widget;
@@ -186,11 +184,11 @@ class HabitPreviewPlugin implements PluginValue {
 	}
 }
 
-const pluginSpec: PluginSpec<HabitPreviewPlugin> = {
-	decorations: (value: HabitPreviewPlugin) => value.decorations,
+const pluginSpec: PluginSpec<HabitPreviewPluginLegacy> = {
+	decorations: (value: HabitPreviewPluginLegacy) => value.decorations,
 };
 
-export const habitPreviewPlugin = ViewPlugin.fromClass(
-	HabitPreviewPlugin,
+export const habitPreviewPluginLegacy = ViewPlugin.fromClass(
+	HabitPreviewPluginLegacy,
 	pluginSpec
 );
