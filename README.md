@@ -24,4 +24,4 @@ Will show the date of the daily note in a relative date format. I.e. "Yesterday"
 ![Reldate Demo](images/reldate.gif)
 
 ## Installation
-This plugin is currently pending review for the Obsidian Plugin Marketplace. To install manually, you can create a folder in the `.obsidian/plugins` directory of your workspace called "definition-format-shortcut", and add the `main.js` and `manifest.json` files from the latest release on GitHub.
+This plugin is currently pending review for the Obsidian Plugin Marketplace. To install manually, you can create a folder in the `.obsidian/plugins` directory of your workspace called "habit-helpers", and add the `main.js`, `styles.css` and `manifest.json` files from the latest release on GitHub.
